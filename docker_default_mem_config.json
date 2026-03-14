@@ -1,0 +1,18 @@
+{
+  "base_port": $ENV.ALLTALK_MEM_BASE_PORT,
+  "api_server_port": $ENV.ALLTALK_MEM_API_SERVER_PORT,
+  "auto_start_engines": $ENV.ALLTALK_MEM_AUTO_START_ENGINES,
+  "max_instances": $ENV.ALLTALK_MEM_MAX_INSTANCES,
+  "gradio_interface_port": $ENV.ALLTALK_MEM_GRADIO_INTERFACE_PORT,
+  "max_retries": $ENV.ALLTALK_MEM_MAX_RETRIES,
+  "initial_wait": $ENV.ALLTALK_MEM_INITIAL_WAIT,
+  "backoff_factor": $ENV.ALLTALK_MEM_BACKOFF_FACTOR,
+  "debug_mode": $ENV.ALLTALK_MEM_DEBUG_MODE,
+  "max_queue_time": $ENV.ALLTALK_MEM_MAX_QUEUE_TIME,
+  "queue_check_interval": $ENV.ALLTALK_MEM_QUEUE_CHECK_INTERVAL,
+  "tts_request_timeout": $ENV.ALLTALK_MEM_TTS_REQUEST_TIMEOUT,
+  "text_length_factor": $ENV.ALLTALK_MEM_TEXT_LENGTH_FACTOR,
+  "concurrent_request_factor": $ENV.ALLTALK_MEM_CONCURRENT_REQUEST_FACTOR,
+  "diminishing_factor": $ENV.ALLTALK_MEM_DIMINISHING_FACTOR,
+  "queue_position_factor": $ENV.ALLTALK_MEM_QUEUE_POSITION_FACTOR
+}

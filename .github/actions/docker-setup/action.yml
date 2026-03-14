@@ -18,8 +18,13 @@ runs:
       uses: jlumbroso/free-disk-space@v1.3.1
       with:
         tool-cache: true
+<<<<<<< HEAD
         swap-storage: false
         large-packages: false
+=======
+        swap-storage: true
+        large-packages: true
+>>>>>>> f16117e95b540e9bbbd8247b49ca6c6b1350b172
     - name: Read variables
       shell: bash
       run: |

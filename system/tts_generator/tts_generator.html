@@ -501,6 +501,26 @@
             /* Apply the input styling */
             margin-top: 15px
         }
+
+        #customFileName {
+            width: 130px;
+            /* Adjust the width as needed */
+            padding: 10px;
+            margin-bottom: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #f1f1f1;
+            /* Set the background color to match the other inputs */
+            color: #000;
+            /* Set the text color */
+        }
+
+        .dark-mode #customFileName {
+            background-color: #C0C0C0;
+            /* Set the background color for dark mode */
+            color: #000;
+            /* Set the text color for dark mode */
+        }
     </style>
 
 
@@ -520,6 +540,67 @@
         <div class="setting voice-setting">
             <label for="character_voice_gen">Character Voice:</label>
             <select id="character_voice_gen"></select>
+        </div>
+
+        <div class="setting voice-setting">
+            <label for="RVC_voice_gen">RVC Voice:</label>
+            <select id="RVC_voice_gen"></select>
+        </div>
+
+        <div class="setting voice-setting">
+            <label for="RVC_voice_pitch">RVC Pitch:</label>
+            <select id="RVC_voice_pitch">
+                <!-- Loop through -24 to 24, setting 0 as the default option -->
+                <option value="-24">-24</option>
+                <option value="-23">-23</option>
+                <option value="-22">-22</option>
+                <option value="-21">-21</option>
+                <option value="-20">-20</option>
+                <option value="-19">-19</option>
+                <option value="-18">-18</option>
+                <option value="-17">-17</option>
+                <option value="-16">-16</option>
+                <option value="-15">-15</option>
+                <option value="-14">-14</option>
+                <option value="-13">-13</option>
+                <option value="-12">-12</option>
+                <option value="-11">-11</option>
+                <option value="-10">-10</option>
+                <option value="-9">-9</option>
+                <option value="-8">-8</option>
+                <option value="-7">-7</option>
+                <option value="-6">-6</option>
+                <option value="-5">-5</option>
+                <option value="-4">-4</option>
+                <option value="-3">-3</option>
+                <option value="-2">-2</option>
+                <option value="-1">-1</option>
+                <option value="0" selected>0</option> <!-- Default option -->
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+                <option value="13">13</option>
+                <option value="14">14</option>
+                <option value="15">15</option>
+                <option value="16">16</option>
+                <option value="17">17</option>
+                <option value="18">18</option>
+                <option value="19">19</option>
+                <option value="20">20</option>
+                <option value="21">21</option>
+                <option value="22">22</option>
+                <option value="23">23</option>
+                <option value="24">24</option>
+            </select>
         </div>
 
         <div class="setting language-setting">
@@ -562,6 +643,10 @@
             </select>
         </div>
 
+        <div class="setting">
+            <label for="customFileName">Custom File Name:</label>
+            <input type="text" id="customFileName" name="customFileName" value="TTS">
+        </div>
 
         <div class="setting slider-setting-wrapper">
             <label for="chunkSize">Chunk Sizes:</label>
@@ -617,6 +702,7 @@
     <button class="conditional-btn" onclick="exportToJSON()" style="margin-right: 10px;">Export JSON</button>
     <button class="conditional-btn" id="exportsrttitles" style="margin-right: 10px;">Export SRT</button>
     <button class="conditional-btn" onclick="exportMP3()" style="margin-right: 10px;">Export to WAV</button>
+    <button class="conditional-btn" onclick="exportToMP3()" style="margin-right: 10px;">Export to MP3</button>
     <label for="splitEvery">Export Split:</label>
     <select id="splitEvery" name="splitEvery" style="margin-right: 40px;">
         <option value="100">100</option>
@@ -640,6 +726,16 @@
         <option value="91">91</option>
         <option value="90">90</option>
     </select>
+    <label for="whisperModel">WhisperV:</label>
+    <select id="whisperModel" name="whisperModel" class="fixed-size-dropdown">
+        <option value="large-v3" selected>Large-v3 (Default)</option>
+        <option value="tiny">Tiny</option>
+        <option value="base">Base</option>
+        <option value="small">Small</option>
+        <option value="medium">Medium</option>
+        <option value="turbo">Turbo</option>
+        <option value="large-v3-turbo">Large-v3-Turbo</option>
+    </select>
     <div id="paginationControls">
         <button class="conditional-btn pagination-btn" id="prevPage">Previous</button>
         <span id="pageIndicator">Page 1 of X</span>
@@ -662,13 +758,19 @@
 </div>
 </div>
 
-<!-- Howler.js script inclusion -->
+<!-- External libraries -->
+<script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
 <script src="./howler.min.js"></script>
+
+<!-- Main script -->
 <script type="module">
     import Crunker from './crunker.esm.js';
 
+    // Create a single instance of Crunker to be used by both functions
+    const crunker = new Crunker();
+
+    // Export to WAV function
     async function exportMP3() {
-        const crunker = new Crunker();
         const fileUrls = ttsList.map(item => item.fileUrl);
         const splitEvery = parseInt(document.getElementById('splitEvery').value) || 500;
         const progressIndicator = document.getElementById('progressIndicator');
@@ -685,7 +787,7 @@
                 const totalBatches = Math.ceil(fileUrls.length / splitEvery);
                 if (progressText) {
                     progressText.textContent = `Processing batch ${currentBatch} of ${totalBatches}`;
-                    progressText.style.color = 'black'; // Set the text color to black
+                    progressText.style.color = 'black';
                 }
 
                 const batchUrls = fileUrls.slice(i, Math.min(i + splitEvery, fileUrls.length));
@@ -694,9 +796,7 @@
                 const output = crunker.export(combined, "audio/wav");
                 crunker.download(output.blob, `combined_audio_part_${currentBatch}.wav`);
 
-                // Clear audioBuffers array to free up memory
                 audioBuffers.length = 0;
-
                 console.log(`Exported batch ${currentBatch} of ${totalBatches}`);
             }
         } catch (error) {
@@ -707,15 +807,93 @@
         } finally {
             if (progressIndicator && progressText) {
                 progressIndicator.style.display = 'none';
-                progressText.textContent = ''; // Reset progress text
+                progressText.textContent = '';
             }
         }
     }
 
+    // Export to MP3 function
+    async function exportToMP3() {
+        const fileUrls = ttsList.map(item => item.fileUrl);
+        const splitEvery = parseInt(document.getElementById('splitEvery').value) || 500;
+        const progressIndicator = document.getElementById('progressIndicator');
+        const progressText = document.getElementById('progressText');
+
+        if (progressIndicator && progressText) {
+            progressIndicator.style.display = 'block';
+            progressText.textContent = 'Starting MP3 export...';
+        }
+
+        try {
+            for (let i = 0; i < fileUrls.length; i += splitEvery) {
+                const currentBatch = Math.floor(i / splitEvery) + 1;
+                const totalBatches = Math.ceil(fileUrls.length / splitEvery);
+                if (progressText) {
+                    progressText.textContent = `Processing MP3 batch ${currentBatch} of ${totalBatches}`;
+                }
+
+                const batchUrls = fileUrls.slice(i, Math.min(i + splitEvery, fileUrls.length));
+                const audioBuffers = await crunker.fetchAudio(...batchUrls);
+                const combined = crunker.concatAudio(audioBuffers);
+                
+                const sampleRate = 44100;
+                const channels = 1;
+                const kbps = 192;
+                
+                const mp3Encoder = new lamejs.Mp3Encoder(channels, sampleRate, kbps);
+                const mp3Data = [];
+
+                const samples = new Int16Array(combined.length * channels);
+                const leftChannel = combined.getChannelData(0);
+                
+                for (let i = 0; i < leftChannel.length; i++) {
+                    const sample = Math.max(-1, Math.min(1, leftChannel[i]));
+                    samples[i] = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
+                }
+
+                const sampleBlockSize = 1152;
+                for (let i = 0; i < samples.length; i += sampleBlockSize) {
+                    const sampleChunk = samples.subarray(i, i + sampleBlockSize);
+                    const mp3buf = mp3Encoder.encodeBuffer(sampleChunk);
+                    if (mp3buf.length > 0) {
+                        mp3Data.push(mp3buf);
+                    }
+                }
+
+                const mp3buf = mp3Encoder.flush();
+                if (mp3buf.length > 0) {
+                    mp3Data.push(mp3buf);
+                }
+
+                const mp3Blob = new Blob(mp3Data, { type: 'audio/mp3' });
+                const url = window.URL.createObjectURL(mp3Blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `combined_audio_part_${currentBatch}.mp3`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+
+                audioBuffers.length = 0;
+                mp3Data.length = 0;
+
+                console.log(`Exported MP3 batch ${currentBatch} of ${totalBatches}`);
+            }
+        } catch (error) {
+            console.error('Error combining files:', error);
+            if (progressText) {
+                progressText.textContent = 'Error during MP3 export!';
+            }
+        } finally {
+            if (progressIndicator && progressText) {
+                progressIndicator.style.display = 'none';
+                progressText.textContent = '';
+            }
+        }
+    }
+
+    // Expose functions to global scope
     window.exportMP3 = exportMP3;
-
-
-
+    window.exportToMP3 = exportToMP3;
 </script>
 
 <script>
@@ -733,6 +911,7 @@
     let preloadThreshold = 2; // Number of files to preload before starting playback
     let isStreamInitialized = false;
     let characterVoice = document.getElementById("character_voice_gen").value;
+    let RVCVoice = document.getElementById("RVC_voice_gen").value;
     let ttsList = []; // Global list to store TTS details
     let problematicIds = []; // Global list to store ProblematicIDs
     const howlInstances = {};
@@ -744,6 +923,7 @@
     var host = window.location.hostname;
     var port = window.location.port;
     var baseUrl = protocol + "//" + host + (port ? ':' + port : '');
+    let currentGenerationId = 0;
 
     ////////////////////////////////////
     //////// Progress Indicator ////////
@@ -815,7 +995,8 @@
             // If the server confirms the data was saved successfully, trigger analysis
             if (saveData.message === "Data saved successfully") {
                 const accuracy = parseInt(document.getElementById('AnalyzeAccuracy').value) || 98;
-                const analyzeResponse = await fetch(`/api/trigger-analysis?threshold=${accuracy}`);
+                const whisperModel = document.getElementById('whisperModel').value;
+                const analyzeResponse = await fetch(`/api/trigger-analysis?threshold=${accuracy}&whisper_model=${whisperModel}`);
                 const analyzeData = await analyzeResponse.json();
                 if (analyzeData.summary.flagged_ids && analyzeData.summary.flagged_ids.length > 0) {
                     // Update the global problematicIds array with the new flagged IDs
@@ -917,9 +1098,12 @@
             const textInput = document.getElementById("text_input").value;
             const language = document.getElementById("language").value;
             const characterVoice = document.getElementById("character_voice_gen").value;
+            const RVCVoice = document.getElementById("RVC_voice_gen").value;
+            const RVCPitch = document.getElementById("RVC_voice_pitch").value;
             const volume = parseFloat(document.getElementById("volume").value);
             const chunkSize = parseInt(document.getElementById("chunkSize").value);
             const playType = document.getElementById('playType').value; // Play type (chunk or stream)
+            const customFileName = document.getElementById("customFileName").value; // Get the custom file name
             playModeValue = document.getElementById('playMode').value;
 
             let cleanedText = textInput.replace(/ \\- | \\– /g, ' ');
@@ -927,7 +1111,12 @@
             cleanedText = cleanedText.replace(/\\.\\s'/g, ".'");
             cleanedText = cleanedText.replace(/(?<!\\w)\['\]+(?!\\w)/g, '');
             cleanedText = cleanedText.replace(/"/g, "'");
+<<<<<<< HEAD
             cleanedText = cleanedText.replace(/[^a-zA-Z0-9\s.,;:!?\-'"$À-ÿ\u0400-\u04FF\u0150\u0151\u0170\u0171\u0900-\u097F\u2018\u2019\u201C\u201D\u2026\u3001\u3002\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\uAC00-\uD7A3\u1100-\u11FF\u3130-\u318F\uFF01\uFF0c\uFF1A\uFF1B\uFF1F]/g, '');
+=======
+            //cleanedText = cleanedText.replace(/[^a-zA-Z0-9\s.,;:!?\-'"$À-ÿ\u0400-\u04FF\u0150\u0151\u0170\u0171\u0900-\u097F\u2018\u2019\u201C\u201D\u2026\u3001\u3002\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\uAC00-\uD7A3\u1100-\u11FF\u3130-\u318F\uFF01\uFF0c\uFF1A\uFF1B\uFF1F]/g, '');
+            cleanedText = cleanedText.replace(/[^a-zA-Z0-9\s.,;:!?\-'"$À-ÿ\u00C0-\u017F\u0400-\u04FF\u0150\u0151\u0170\u0171\u0900-\u097F\u2018\u2019\u201C\u201D\u2026\u3001\u3002\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\uAC00-\uD7A3\u1100-\u11FF\u3130-\u318F\uFF01\uFF0c\uFF1A\uFF1B\uFF1F\u011E\u011F\u0130\u0131\u015E\u015F\u00E7\u00C7\u00F6\u00D6]/g, '');
+>>>>>>> f16117e95b540e9bbbd8247b49ca6c6b1350b172
             cleanedText = cleanedText.replace(/-\\s/g, '; ');
             cleanedText = cleanedText.replace(/--/g, '; ');
             // Split by Fullwidth/CJK punctuation regardless of if there are spaces behind them
@@ -967,13 +1156,13 @@
                     showProgress(i + 1, totalChunks, playType);
                     if (playModeValue === 'local') {
                         // Generate the chunk and play it locally
-                        await generateAndCache(chunks[i], language, characterVoice, volume);
+                        await generateAndCache(chunks[i], language, characterVoice, RVCVoice, RVCPitch, volume, customFileName);
                     } else if (playModeValue === 'remote') {
                         // Generate the chunk and play it remotely
-                        await generateAndPlayRemote(chunks[i], language, characterVoice, volume);
+                        await generateAndPlayRemote(chunks[i], language, characterVoice, RVCVoice, RVCPitch, volume, customFileName);
                     } else if (playModeValue === 'none') {
                         // Generate the chunk but do not play it
-                        await generateWithoutPlayback(chunks[i], language, characterVoice);
+                        await generateWithoutPlayback(chunks[i], language, characterVoice, RVCVoice, RVCPitch, customFileName);
                     }
                 }
             }
@@ -985,28 +1174,52 @@
         }
     }
 
-    async function processChunks(chunks, language, characterVoice, volume) {
+    async function processChunks(chunks, language, characterVoice, RVCVoice, RVCPitch, volume, customFileName) {
         for (let i = 0; i < chunks.length; i++) {
             if (stopTTSGeneration) break;
-            await generateAndCache(chunks[i], language, characterVoice, volume);
+            await generateAndCache(chunks[i], language, characterVoice, RVCVoice, RVCPitch, volume, customFileName, i + 1); // Pass custom file name and chunk index
             if (audioQueue.length >= preloadThreshold && !isPlaying) {
                 playNextLocalChunk();
             }
         }
     }
 
-    async function generateAndCache(chunk, language, characterVoice, volume, id = null) {
+    // Function to generate a 4-character UUID
+    function generateUUID() {
+        return 'xxxx'.replace(/[x]/g, function (c) {
+            var r = Math.random() * 16 | 0;
+            return r.toString(16);
+        });
+    }
+
+    async function generateAndCache(chunk, language, characterVoice, RVCVoice, RVCPitch, volume, customFileName, chunkIndex = null, id = null) {
         try {
+            let paddedChunkIndex;
+
+            if (chunkIndex === null) {
+                // If chunkIndex is not provided, increment the current generation ID
+                currentGenerationId++;
+                paddedChunkIndex = String(currentGenerationId).padStart(5, '0');
+            } else {
+                // If chunkIndex is provided (during regeneration), use it as is
+                paddedChunkIndex = String(chunkIndex).padStart(5, '0');
+            }
+
+            // Generate a 4-character UUID
+            const uuid = generateUUID();
+
             const data = new URLSearchParams({
                 text_input: chunk.trim(),
                 text_filtering: "standard",
                 character_voice_gen: characterVoice,
+                rvccharacter_voice_gen: RVCVoice,
+                rvccharacter_pitch: RVCPitch,
                 narrator_enabled: "false",
                 narrator_voice_gen: characterVoice,
                 text_not_inside: "character",
                 language: language,
-                output_file_name: "TTS",
-                output_file_timestamp: "true",
+                output_file_name: `${customFileName}_${paddedChunkIndex}_${uuid}`, // Include the UUID in the file name
+                output_file_timestamp: "false",
                 autoplay: "false",
                 autoplay_volume: volume
             });
@@ -1077,8 +1290,21 @@
         // Retrieve the current volume setting from the HTML input
         const currentVolume = parseFloat(document.getElementById("volume").value);
 
+        // Extract the file name from the fileUrl
+        const fileName = ttsDetails.fileUrl.split('/').pop();
+
+        // Extract the custom file name and chunk index from the file name
+        const fileNameParts = fileName.split('_');
+        const customFileName = fileNameParts[0];
+        const chunkIndex = parseInt(fileNameParts[1], 10);
+        const RVCVoice = document.getElementById("RVC_voice_gen").value;
+        const RVCPitch = document.getElementById("RVC_voice_pitch").value;
+
+        // Call the TTS generation with the same details, current volume, and existing file name
+        const result = await generateAndCache(ttsDetails.text, ttsDetails.language, ttsDetails.characterVoice, RVCVoice, RVCPitch, currentVolume, customFileName, chunkIndex, id);
+
         // Call the TTS generation with the same details and current volume
-        const result = await generateAndCache(ttsDetails.text, ttsDetails.language, ttsDetails.characterVoice, currentVolume, id);
+        //const result = await generateAndCache(ttsDetails.text, ttsDetails.language, ttsDetails.characterVoice, currentVolume, id);
 
         if (result && result.status === "generate-success") {
             const index = problematicIds.indexOf(id);
@@ -1105,19 +1331,32 @@
 
 
 
-    async function generateWithoutPlayback(chunk, language, characterVoice, id = null) {
+    async function generateWithoutPlayback(chunk, language, characterVoice, RVCVoice, RVCPitch, customFileName, chunkIndex = null) {
         // Perform the generation process as usual but do not play the audio
         try {
+            let paddedChunkIndex;
+            if (chunkIndex === null) {
+                // If chunkIndex is not provided, increment the current generation ID
+                currentGenerationId++;
+                paddedChunkIndex = String(currentGenerationId).padStart(5, '0');
+            } else {
+                // If chunkIndex is provided (during regeneration), use it as is
+                paddedChunkIndex = String(chunkIndex).padStart(5, '0');
+            }
+
+            const uuid = generateUUID();
             const data = new URLSearchParams({
                 text_input: chunk.trim(),
                 text_filtering: "standard",
                 character_voice_gen: characterVoice,
+                rvccharacter_voice_gen: RVCVoice,
+                rvccharacter_pitch: RVCPitch,
                 narrator_enabled: "false",
                 narrator_voice_gen: characterVoice,
                 text_not_inside: "character",
                 language: language,
-                output_file_name: "TTS",
-                output_file_timestamp: "true",
+                output_file_name: `${customFileName}_${paddedChunkIndex}_${uuid}`, // Use the custom file name with padded chunk index
+                output_file_timestamp: "false",
                 autoplay: "false",
                 autoplay_volume: "0.1"
             });
@@ -1130,19 +1369,9 @@
             });
             const result = await response.json();
             if (result.output_file_url) {
-                // If an ID was passed in, we're regenerating an existing item
-                if (id !== null) {
-                    let itemIndex = ttsList.findIndex(item => item.id === id);
-                    if (itemIndex !== -1) {
-                        ttsList[itemIndex].fileUrl = result.output_file_url;
-                        // Other properties can be updated as needed, e.g., in case the language or voice has changed
-                        ttsList[itemIndex].language = language;
-                        ttsList[itemIndex].characterVoice = characterVoice;
-                    }
-                } else {
-                    // No ID was passed in, so we add a new item to the list
-                    addToTTSList(result.output_file_url, chunk, characterVoice, language);
-                }
+                // Add the new item to the list
+                addToTTSList(result.output_file_url, chunk, characterVoice, language);
+
                 const newPage = Math.ceil(ttsList.length / itemsPerPage);
                 if (currentPage !== newPage) {
                     currentPage = newPage; // Move to the new page where the item was added
@@ -1220,26 +1449,39 @@
     }
 
 
-    async function generateAndPlayRemote(chunk, language, characterVoice, volume) {
+    async function generateAndPlayRemote(chunk, language, characterVoice, RVCVoice, RVCPitch, volume, customFileName, chunkIndex = null) {
         try {
             if (stopTTSGeneration) {
                 console.log("TTS generation stopped.");
                 return; // Early return if stop flag is set
             }
+
+            let paddedChunkIndex;
+            if (chunkIndex === null) {
+                // If chunkIndex is not provided, increment the current generation ID
+                currentGenerationId++;
+                paddedChunkIndex = String(currentGenerationId).padStart(5, '0');
+            } else {
+                // If chunkIndex is provided (during regeneration), use it as is
+                paddedChunkIndex = String(chunkIndex).padStart(5, '0');
+            }
+
+            const uuid = generateUUID();
             const data = new URLSearchParams({
                 text_input: chunk.trim(),
                 text_filtering: "standard",
                 character_voice_gen: characterVoice,
+                rvccharacter_voice_gen: RVCVoice,
+                rvccharacter_pitch: RVCPitch,
                 narrator_enabled: "false",
                 narrator_voice_gen: characterVoice,
                 text_not_inside: "character",
                 language: language,
-                output_file_name: "TTS",
-                output_file_timestamp: "true",
+                output_file_name: `${customFileName}_${paddedChunkIndex}_${uuid}`, // Use the custom file name with padded chunk index
+                output_file_timestamp: "false",
                 autoplay: "true",
                 autoplay_volume: volume,
             });
-
             const response = await fetch(baseUrl + "/api/tts-generate", {
                 method: "POST",
                 headers: {
@@ -1247,13 +1489,21 @@
                 },
                 body: data,
             });
-
             const result = await response.json();
-            if (!response.ok) {
+            if (response.ok) {
+                // Add the new item to the list
+                addToTTSList(result.output_file_url, chunk, characterVoice, language);
+
+                const newPage = Math.ceil(ttsList.length / itemsPerPage);
+                if (currentPage !== newPage) {
+                    currentPage = newPage; // Move to the new page where the item was added
+                }
+                updateUIList();
+
+                console.log("TTS generation complete for chunk:", chunk);
+            } else {
                 throw new Error(`API error: ${result.detail || 'Unknown error'}`);
             }
-
-            console.log("TTS generation complete for chunk:", chunk);
         } catch (error) {
             console.error("Error in generateAndPlayRemote:", error);
         }
@@ -1327,9 +1577,13 @@
 
     async function previewVoice() {
         const characterVoice = document.getElementById("character_voice_gen").value;
+        const RVCVoice = document.getElementById("RVC_voice_gen").value;
+        const RVCPitch = document.getElementById("RVC_voice_pitch").value;
         try {
             const formData = new FormData();
             formData.append("voice", characterVoice);
+            formData.append("rvccharacter_voice_gen", RVCVoice);
+            formData.append("rvccharacter_pitch", RVCPitch);
 
             const response = await fetch(baseUrl + "/api/previewvoice/", {
                 method: "POST",
@@ -1614,6 +1868,7 @@
         ttsList = [];
         listPlayIndex = 0; // If listPlayIndex is the correct variable, use it instead of currentlyPlayingIndex
         listPlaying = false; // Assuming listPlaying is the correct variable for list playback state
+        currentGenerationId = 0;
         updateUIList(); // Refresh the list display
         // Reset the 'Start From ID' input if you have this element in your HTML
         const startFromIdElement = document.getElementById('startFromId');
@@ -1874,6 +2129,37 @@
         }
     }
 
+    async function fetchRVCVoices() {
+        try {
+            const response = await fetch(baseUrl + "/api/rvcvoices");
+            const result = await response.json();
+            const RVCVoiceSelect = document.getElementById("RVC_voice_gen");
+
+            RVCVoiceSelect.innerHTML = ''; // Clear existing options
+
+            // Ensure 'rvcvoices' exists in the response
+            if (result.rvcvoices && Array.isArray(result.rvcvoices)) {
+                result.rvcvoices.forEach(voice => {
+                    const option = document.createElement("option");
+                    option.value = voice;
+                    option.text = voice;
+                    RVCVoiceSelect.add(option);
+                });
+            } else {
+                console.error("No valid 'rvcvoices' found in the response");
+            }
+
+            // Restore saved RVC voice preference
+            const savedRVCVoice = localStorage.getItem('RVCVoice');
+            if (savedRVCVoice) {
+                RVCVoiceSelect.value = savedRVCVoice;
+            }
+
+        } catch (error) {
+            console.error("Error fetching RVC voices:", error);
+        }
+    }
+
     // Replace stopPlayback function to stop all sounds using Howler.js
     function stopPlayback() {
         Howler.stop();
@@ -1993,6 +2279,11 @@
         characterVoice = this.value;
     });
 
+    // Event listener to update RVCVoice when the selection changes
+    document.getElementById("RVC_voice_gen").addEventListener('change', function () {
+        RVCVoice = this.value;
+    });
+
     document.getElementById('language').addEventListener('change', function () {
         // Get the selected language from the dropdown
         const selectedLanguage = this.value;
@@ -2051,6 +2342,7 @@
     function setupPage() {
         // Fetch voices or other initial data
         fetchVoices();
+        fetchRVCVoices();
         updateButtonStyles()
 
         // Check for dark mode preference in localStorage, default to enabled if not set
@@ -2072,6 +2364,12 @@
         const savedCharacterVoice = localStorage.getItem('characterVoice');
         if (savedCharacterVoice) {
             document.getElementById('character_voice_gen').value = savedCharacterVoice;
+        }
+
+        // Initialize RVC voice based on preference
+        const savedRVCVoice = localStorage.getItem('RVCVoice');
+        if (savedRVCVoice) {
+            document.getElementById('RVC_voice_gen').value = savedRVCVoice;
         }
 
         // Initialize language based on preference
@@ -2120,6 +2418,8 @@
             savePreferences();
         });
         document.getElementById('character_voice_gen').addEventListener('change', savePreferences);
+        document.getElementById('RVC_voice_gen').addEventListener('change', savePreferences);
+        document.getElementById('language').addEventListener('change', savePreferences);
         document.getElementById('language').addEventListener('change', savePreferences);
         document.getElementById('playType').addEventListener('change', function () {
             savePreferences(); // Save the new play type
@@ -2175,6 +2475,10 @@
         // Save character voice preference
         const characterVoice = document.getElementById('character_voice_gen').value;
         localStorage.setItem('characterVoice', characterVoice);
+
+        // Save RVC voice preference
+        const RVCVoice = document.getElementById('RVC_voice_gen').value;
+        localStorage.setItem('RVCVoice', RVCVoice);
 
         // Save language preference
         const language = document.getElementById('language').value;

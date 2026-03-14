@@ -1,0 +1,41 @@
+{
+  "branding": $ENV.ALLTALK_BRANDING,
+  "delete_output_wavs": $ENV.ALLTALK_DELETE_OUTPUT_WAVS,
+  "gradio_interface": $ENV.ALLTALK_GRADIO_INTERFACE,
+  "output_folder": $ENV.ALLTALK_OUTPUT_FOLDER,
+  "gradio_port_number": $ENV.ALLTALK_GRADIO_PORT_NUMBER,
+  "launch_gradio": $ENV.ALLTALK_LAUNCH_GRADIO,
+  "transcode_audio_format": $ENV.ALLTALK_TRANSCODE_AUDIO_FORMAT,
+  "rvc_settings": {
+    "rvc_enabled": $ENV.ALLTALK_RVC_ENABLED,
+    "rvc_char_model_file": $ENV.ALLTALK_RVC_CHAR_MODEL_FILE,
+    "rvc_narr_model_file": $ENV.ALLTALK_RVC_NARR_MODEL_FILE,
+    "split_audio": $ENV.ALLTALK_RVC_SPLIT_AUDIO,
+    "autotune": $ENV.ALLTALK_RVC_AUTOTUNE,
+    "pitch": $ENV.ALLTALK_RVC_PITCH,
+    "filter_radius": $ENV.ALLTALK_RVC_FILTER_RADIUS,
+    "index_rate": $ENV.ALLTALK_RVC_INDEX_RATE,
+    "rms_mix_rate": $ENV.ALLTALK_RVC_RMS_MIX_RATE,
+    "protect": $ENV.ALLTALK_RVC_PROTECT,
+    "hop_length": $ENV.ALLTALK_RVC_HOP_LENGTH,
+    "f0method": $ENV.ALLTALK_RVC_F0METHOD,
+    "embedder_model": $ENV.ALLTALK_RVC_EMBEDDER_MODEL,
+    "training_data_size": $ENV.ALLTALK_RVC_TRAINING_DATA_SIZE,
+    "model_cache_size": $ENV.ALLTALK_RVC_MODEL_CACHE_SIZE
+  },
+  "api_def": {
+    "api_port_number": $ENV.ALLTALK_API_PORT_NUMBER,
+    "api_allowed_filter": $ENV.ALLTALK_API_ALLOWED_FILTER,
+    "api_length_stripping": $ENV.ALLTALK_API_LENGTH_STRIPPING,
+    "api_max_characters": $ENV.ALLTALK_API_MAX_CHARACTERS,
+    "api_use_legacy_api": $ENV.ALLTALK_API_USE_LEGACY_API,
+    "api_text_filtering": $ENV.ALLTALK_API_TEXT_FILTERING,
+    "api_narrator_enabled": $ENV.ALLTALK_API_NARRATOR_ENABLED,
+    "api_text_not_inside": $ENV.ALLTALK_API_TEXT_NOT_INSIDE,
+    "api_language": $ENV.ALLTALK_API_LANGUAGE,
+    "api_output_file_name": $ENV.ALLTALK_API_OUTPUT_FILE_NAME,
+    "api_output_file_timestamp": $ENV.ALLTALK_API_OUTPUT_FILE_TIMESTAMP,
+    "api_autoplay": $ENV.ALLTALK_API_AUTOPLAY,
+    "api_autoplay_volume": $ENV.ALLTALK_API_AUTOPLAY_VOLUME
+  }
+}

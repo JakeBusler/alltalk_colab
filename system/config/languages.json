@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {
   "Arabic": "ar",
   "Chinese": "zh-cn",
@@ -16,4 +17,23 @@
   "Russian": "ru",
   "Spanish": "es",
   "Turkish": "tr"
+=======
+{
+  "Arabic": "ar",
+  "Chinese": "zh-cn",
+  "Czech": "cs",
+  "Dutch": "nl",
+  "English": "en",
+  "French": "fr",
+  "German": "de",
+  "Hungarian": "hu",
+  "Italian": "it",
+  "Japanese": "ja",
+  "Korean": "ko",
+  "Polish": "pl",
+  "Portuguese": "pt",
+  "Russian": "ru",
+  "Spanish": "es",
+  "Turkish": "tr"
+>>>>>>> f16117e95b540e9bbbd8247b49ca6c6b1350b172
 }

@@ -42,6 +42,9 @@ if "%ERRORLEVEL%" NEQ "0" (
     goto end
 )
 
+:: Check for "-silent" install command-line argument
+if "%1"=="-silent" goto InstallCustomStandalone
+
 :MainMenu
 cls
 echo.
@@ -49,9 +52,10 @@ echo    %L_BLUE%ALLTALK WINDOWS SETUP UTILITY%RESET%
 echo.
 echo    INSTALLATION TYPE
 echo    1) I am using AllTalk as part of %L_GREEN%Text-generation-webui%RESET%
-echo    2) I am using AllTalk as a %L_GREEN%Standalone Application%RESET%
+echo    2) I am using AllTalk as a %L_BLUE%Standalone Application%RESET%
 echo.
 echo    9) %L_RED%Exit/Quit%RESET%
+echo.
 echo.
 set /p UserOption="    Enter your choice: "
 
@@ -134,6 +138,13 @@ goto StandaloneMenu
 
 :InstallNvidiaTextGen
 pip install -r system\requirements\requirements_textgen.txt
+pip install -r system\requirements\requirements_textgen2.txt
+pip install -r system\requirements\requirements_parler.txt
+echo ** Faiss **
+call "%CONDA_ROOT_PREFIX%\Scripts\conda.exe" install -y pytorch::faiss-cpu
+echo ** FFmpeg **
+call "%CONDA_ROOT_PREFIX%\Scripts\conda.exe" install -y -c conda-forge "ffmpeg=*=*gpl*"
+call "%CONDA_ROOT_PREFIX%\Scripts\conda.exe" install -y -c conda-forge "ffmpeg=*=h*_*" --no-deps
 if %ERRORLEVEL% neq 0 (
     echo.
     echo    There was an error installing the requirements.
@@ -359,7 +370,7 @@ set TEMP=%cd%\alltalk_environment
 set INSTALL_DIR=%cd%\alltalk_environment
 set CONDA_ROOT_PREFIX=%cd%\alltalk_environment\conda
 set INSTALL_ENV_DIR=%cd%\alltalk_environment\env
-set MINICONDA_DOWNLOAD_URL=https://repo.anaconda.com/miniconda/Miniconda3-py310_23.3.1-0-Windows-x86_64.exe
+set MINICONDA_DOWNLOAD_URL=https://repo.anaconda.com/miniconda/Miniconda3-py311_24.4.0-0-Windows-x86_64.exe
 set conda_exists=F
 
 @rem figure out whether git and conda need to be installed
@@ -381,28 +392,212 @@ call "%CONDA_ROOT_PREFIX%\_conda.exe" --version || ( echo. && echo Miniconda not
 
 @rem create the installer env
 echo Packages to install: %PACKAGES_TO_INSTALL%
-call "%CONDA_ROOT_PREFIX%\_conda.exe" create --no-shortcuts -y -k --prefix "%INSTALL_ENV_DIR%" python=3.11 || ( echo. && echo Conda environment creation failed. && goto end )
+call "%CONDA_ROOT_PREFIX%\_conda.exe" create --no-shortcuts -y -k --prefix "%INSTALL_ENV_DIR%" python=3.11.9 || ( echo. && echo Conda environment creation failed. && goto end )
 
 @rem check if conda environment was actually created
 if not exist "%INSTALL_ENV_DIR%\python.exe" ( echo. && echo Conda environment is empty. && goto end )
 
 @rem activate installer env
 call "%CONDA_ROOT_PREFIX%\condabin\conda.bat" activate "%INSTALL_ENV_DIR%" || ( echo. && echo Miniconda hook not found. && goto end )
+rem Install required packages
 
+:install_pytorch
+echo ** Installing PyTorch 2.2.1 **
+call "%CONDA_ROOT_PREFIX%\Scripts\conda.exe" install -y pytorch==2.2.1 torchvision==0.17.1 torchaudio==2.2.1 pytorch-cuda=12.1 -c pytorch -c nvidia
 echo.
-echo     Downloading and installing PyTorch. This step can take a long time
-echo     depending on your internet connection and hard drive speed. Please
-echo     be patient.
+if errorlevel 1 (
+    echo PyTorch installation failed, errorlevel was %errorlevel%. There should be a Conda
+    echo error message above with a code and/or text explanation of the issue. Please note 
+    echo the error code to help with diagnotics. 
+    echo.
+    echo Generally speaking though, errors could be caused by:
+    echo.
+    echo      1. Internet connection issues/unable to download PyTorch from Conda's website.
+    echo      2. Disk space related issues - Check your disk space on this drive.
+    echo      3. Incorrect or missing Conda environment - Restart installation.
+    echo      4. Permissions issues - Check you have enough rights on this system.
+    echo      5. Firewall or proxy settings blocking access to Conda's servers.
+    echo      6. Antivirus or security software interference.
+    echo      7. Other issues not mentioned above.
+    echo.
+    echo      Known errors are in the AllTalk Github Wiki > Error Messages Help/Support
+    echo.
+    choice /C YN /M "Do you want to retry the Pytorch installation?"
+    if errorlevel 2 goto End
+    if errorlevel 1 goto install_pytorch
+) else (
+    echo PyTorch installation was successful.
+    echo.
+)
+
+:install_faiss
+echo ** Installing Faiss **
+call "%CONDA_ROOT_PREFIX%\Scripts\conda.exe" install -y pytorch::faiss-cpu
 echo.
+<<<<<<< HEAD
 pip install torch==2.2.2+cu121 torchaudio>=2.2.2+cu121 --upgrade --force-reinstall --extra-index-url https://download.pytorch.org/whl/cu121
 echo Installing other requirements.
-echo.
-pip install -r system\requirements\requirements_standalone.txt
-curl -LO https://github.com/erew123/alltalk_tts/releases/download/DeepSpeed-14.0/deepspeed-0.14.0+ce78a63-cp311-cp311-win_amd64.whl
-echo Installing DeepSpeed...
-pip install deepspeed-0.14.0+ce78a63-cp311-cp311-win_amd64.whl
-del deepspeed-0.14.0+ce78a63-cp311-cp311-win_amd64.whl
+=======
+if errorlevel 1 (
+    echo Faiss installation failed, errorlevel was %errorlevel%. There should be a Conda
+    echo error message above with a code and/or text explanation of the issue. Please note 
+    echo the error code to help with diagnotics. 
+    echo.
+    echo Generally speaking though, errors could be caused by:
+    echo.
+    echo      1. Internet connection issues/unable to download Faiss from Conda's website.
+    echo      2. Disk space related issues - Check your disk space on this drive.
+    echo      3. Incorrect or missing Conda environment - Restart installation.
+    echo      4. Permissions issues - Check you have enough rights on this system.
+    echo      5. Firewall or proxy settings blocking access to Conda's servers.
+    echo      6. Antivirus or security software interference.
+    echo      7. Your Conda policy is set to Strict see the Github Wiki for help with this.
+    echo      8. Other issues not mentioned above.
+    echo.
+    echo      Known errors are in the AllTalk Github Wiki > Error Messages Help/Support
+    echo.
+    choice /C YN /M "Do you want to retry the Faiss installation?"
+    if errorlevel 2 goto End
+    if errorlevel 1 goto install_faiss
+) else (
+    echo Faiss installation was successful.
+    echo.
+)
 
+:install_ffmpeg
+echo ** Installing FFmpeg **
+call "%CONDA_ROOT_PREFIX%\Scripts\conda.exe" install -y -c conda-forge "ffmpeg=*=*gpl*"
+call "%CONDA_ROOT_PREFIX%\Scripts\conda.exe" install -y -c conda-forge "ffmpeg=*=h*_*" --no-deps
+>>>>>>> f16117e95b540e9bbbd8247b49ca6c6b1350b172
+echo.
+if errorlevel 1 (
+    echo FFmpeg installation failed, errorlevel was %errorlevel%. There should be a Conda
+    echo error message above with a code and/or text explanation of the issue. Please note 
+    echo the error code to help with diagnotics. 
+    echo.
+    echo Generally speaking though, errors could be caused by:
+    echo.
+    echo      1. Internet connection issues/unable to download FFmpeg from Conda's website.
+    echo      2. Disk space related issues - Check your disk space on this drive.
+    echo      3. Incorrect or missing Conda environment - Restart installation.
+    echo      4. Permissions issues - Check you have enough rights on this system.
+    echo      5. Firewall or proxy settings blocking access to Conda's servers.
+    echo      6. Antivirus or security software interference.
+    echo      7. Your Conda policy is set to Strict see the Github Wiki for help with this.
+    echo      8. Other issues not mentioned above.
+    echo.
+    echo      Known errors are in the AllTalk Github Wiki > Error Messages Help/Support
+    echo.
+    choice /C YN /M "Do you want to retry the FFmpeg installation?"
+    if errorlevel 2 goto End
+    if errorlevel 1 goto install_ffmpeg
+) else (
+    echo FFmpeg installation was successful.
+    echo.
+)
+
+echo ** Requirements file **
+pip install -r system\requirements\requirements_standalone.txt
+echo.
+
+:update_gradio
+echo ** Updating Gradio **
+pip install --upgrade gradio==4.44.1
+echo.
+if errorlevel 1 (
+    echo Gradio update failed, errorlevel was %errorlevel%. There should be an error
+    echo message above with a code and/or text explanation of the issue. Please note 
+    echo the error code to help with diagnotics. 
+    echo.
+    echo Generally speaking though, errors could be caused by:
+    echo.
+    echo      1. Internet connection issues/unable to download Gradio from PyPI.
+    echo      2. Disk space related issues - Check your disk space on this drive.
+    echo      3. Incorrect or missing Python environment - Restart installation.
+    echo      4. Permissions issues - Check you have enough rights on this system.
+    echo      5. Firewall or proxy settings blocking access to PyPI servers.
+    echo      6. Antivirus or security software interference.
+    echo      7. Other issues not mentioned above.
+    echo.
+    echo      Known errors are in the AllTalk Github Wiki > Error Messages Help/Support
+    echo.
+    choice /C YN /M "Do you want to retry the Gradio update?"
+    if errorlevel 2 goto End
+    if errorlevel 1 goto update_gradio
+) else (
+    echo Gradio update was successful.
+    echo.
+)
+
+:install_deepspeed
+echo ** Downloading DeepSpeed **
+curl -LO https://github.com/erew123/alltalk_tts/releases/download/DeepSpeed-14.0/deepspeed-0.14.0+ce78a63-cp311-cp311-win_amd64.whl
+echo.
+if errorlevel 1 (
+    echo DeepSpeed download failed, errorlevel was %errorlevel%. There should be an error
+    echo message above with a code and/or text explanation of the issue. Please note 
+    echo the error code to help with diagnotics. 
+    echo.
+    echo Generally speaking though, errors could be caused by:
+    echo.
+    echo      1. Internet connection issues/unable to reach GitHub.
+    echo      2. Disk space related issues - Check your disk space on this drive.
+    echo      3. Permissions issues - Check you have enough rights on this system.
+    echo      4. Firewall or proxy settings blocking access to GitHub.
+    echo      5. Antivirus or security software interference.
+    echo      6. The file may have been moved or deleted from the GitHub repository.
+    echo      7. Other issues not mentioned above.
+    echo.
+    echo      Known errors are in the AllTalk Github Wiki > Error Messages Help/Support
+    echo.
+    choice /C YN /M "Do you want to retry the DeepSpeed download?"
+    if errorlevel 2 goto End
+    if errorlevel 1 goto install_deepspeed
+) else (
+    echo DeepSpeed download was successful.
+    echo.
+)
+
+echo ** Installing DeepSpeed **
+pip install deepspeed-0.14.0+ce78a63-cp311-cp311-win_amd64.whl
+echo.
+if errorlevel 1 (
+    echo DeepSpeed installation failed, errorlevel was %errorlevel%. There should be an error
+    echo message above with a code and/or text explanation of the issue. Please note 
+    echo the error code to help with diagnotics. General issues may be:
+    echo.
+    echo Generally speaking though, errors could be caused by:
+    echo.
+    echo      1. The DeepSpeed wheel file was not downloaded successfully in the previous step.
+    echo      2. Microsoft C++ development tools for Python are not installed correctly.
+    echo      3. Disk space related issues - Check your disk space on this drive.
+    echo      4. Incorrect or missing Python environment - Restart installation.
+    echo      5. Permissions issues - Check you have enough rights on this system.
+    echo      6. Antivirus or security software interference.
+    echo      7. Other issues not mentioned above.
+    echo.
+    echo      Known errors are in the AllTalk Github Wiki > Error Messages Help/Support
+    echo.
+    echo Please ensure you have followed the instructions to install the Microsoft C++ development
+    echo tools for Python, which is detailed on the AllTalk GitHub page.
+    echo.
+    choice /C YN /M "Do you want to retry the DeepSpeed installation?"
+    if errorlevel 2 goto End
+    if errorlevel 1 goto install_deepspeed
+) else (
+    echo DeepSpeed installation was successful.
+    del deepspeed-0.14.0+ce78a63-cp311-cp311-win_amd64.whl
+    echo.
+)
+
+echo ** Installing Parler **
+pip install -r system\requirements\requirements_parler.txt
+echo Clean Environment
+call "%CONDA_ROOT_PREFIX%\Scripts\conda.exe" clean --all --force-pkgs-dirs -y
+echo.
+
+echo.
+echo Installation process completed.
 
 @rem Create start_environment.bat to run AllTalk environment
 echo @echo off > start_environment.bat
@@ -424,11 +619,22 @@ echo set CONDA_ROOT_PREFIX=%cd%\alltalk_environment\conda >> start_finetune.bat
 echo set INSTALL_ENV_DIR=%cd%\alltalk_environment\env >> start_finetune.bat
 echo call "%CONDA_ROOT_PREFIX%\condabin\conda.bat" activate "%INSTALL_ENV_DIR%" >> start_finetune.bat
 echo call python finetune.py >> start_finetune.bat
+echo @echo off > start_diagnostics.bat
+echo cd /D "%~dp0" >> start_diagnostics.bat
+echo set CONDA_ROOT_PREFIX=%cd%\alltalk_environment\conda >> start_diagnostics.bat
+echo set INSTALL_ENV_DIR=%cd%\alltalk_environment\env >> start_diagnostics.bat
+echo call "%CONDA_ROOT_PREFIX%\condabin\conda.bat" activate "%INSTALL_ENV_DIR%" >> start_diagnostics.bat
+echo call python diagnostics.py >> start_diagnostics.bat
 Echo.
 Echo    Run %L_YELLOW%start_alltalk.bat%RESET% to start AllTalk.
+Echo    Run %L_YELLOW%start_diagnostics.bat%RESET% to start the diagnostics.
 Echo    Run %L_YELLOW%start_finetune.bat%RESET% to start Finetuning.
 Echo    Run %L_YELLOW%start_environment.bat%RESET% to start the AllTalk Python environment.
+Echo. 
+Echo    Documentation is built into the Gradio interface. Please explore the documentation for
+Echo    tips, troubleshooing and explanations as most common questions are answered there.
 Echo.
+if "%1"=="-silent" goto End
 pause
 goto StandaloneMenu
 
@@ -445,7 +651,7 @@ if not exist "%cd%\alltalk_environment\" (
 if not defined CONDA_PREFIX goto NoCondaEnvDeleteCustomStandalone
 @rem Deactivate Conda environment if it's active
 Echo    Exiting the Conda Environment. Please run %L_GREEN%atsetup.bat%RESET% again and delete the environment.
-conda deactivate
+call conda deactivate
 :NoCondaEnvDeleteCustomStandalone
 echo Deleting "alltalk_environment". Please wait.
 rd /s /q "alltalk_environment"
@@ -455,6 +661,7 @@ if %ERRORLEVEL% neq 0 (
     echo.
     echo    Failed to delete alltalk_environment folder.
     echo    Please make sure it is not in use and try again.
+    echo    Worst case, manually delete the folder called 'alltalk_environment'
     echo.
     pause
     goto StandaloneMenu
@@ -531,10 +738,13 @@ if errorlevel 1 (
 )
 @rem Run Reapply requirements
 echo.
-echo     Downloading and installing PyTorch. This step can take a long time
-echo     depending on your internet connection and hard drive speed. Please
-echo     be patient.
+echo  Re-installing requirements. If you have problems after this, it may indicate 
+echo  that the custom Python environment is damaged in some way. As such it may be
+echo  best to delete the custom Python environment and re-run the entire setup
+echo  routine again to rebuild AllTalk's Python environment. Please press a key
+echo  to continue re-applying the Requirements for a standalone installation.
 echo.
+<<<<<<< HEAD
 pip install torch==2.2.2+cu121 torchaudio>=2.2.2+cu121 --upgrade --force-reinstall --extra-index-url https://download.pytorch.org/whl/cu121
 echo Installing other requirements.
 echo.
@@ -555,8 +765,10 @@ Echo.
 Echo.
 Echo    Requirements have been re-applied/updated.
 Echo.
+=======
+>>>>>>> f16117e95b540e9bbbd8247b49ca6c6b1350b172
 pause
-goto StandaloneMenu
+goto install_faiss
 
 :STPurgepipcache
 cd /D "%~dp0"
@@ -648,12 +860,27 @@ goto StandaloneMenu
 echo Exiting AllTalk Setup Utility...
 echo.
 Echo    Remember, after installation you can....
+<<<<<<< HEAD
 Echo    Run %L_YELLOW%start_alltalk.bat%RESET% to start AllTalk.
 Echo    Run %L_YELLOW%start_finetune.bat%RESET% to start Finetuning.
 Echo    Run %L_YELLOW%start_environment.bat%RESET% to start the AllTalk Python environment.
 Echo.
+=======
+Echo.
+Echo    Run %L_YELLOW%start_alltalk.bat%RESET% to start AllTalk.
+Echo    Run %L_YELLOW%start_finetune.bat%RESET% to start Finetuning.
+Echo    Run %L_YELLOW%start_environment.bat%RESET% to start the AllTalk Python environment.
+Echo    Run %L_YELLOW%start_diagnostics.bat%RESET% to start generate a diagnostics file.
+Echo.
+Echo    Documentation is built into the Gradio interface. Please explore the documentation for
+Echo    tips, troubleshooing and explanations as most common questions are answered there.
+>>>>>>> f16117e95b540e9bbbd8247b49ca6c6b1350b172
 exit /b
 
 :End
 echo Exiting AllTalk Setup Utility...
+Echo.
+Echo    Documentation is built into the Gradio interface and the AllTalk Wiki page on Github.
+Echo    Please explore the documentation for tips, troubleshooing and explanations on the most
+Echo    common questions.
 exit /b
