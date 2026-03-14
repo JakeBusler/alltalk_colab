@@ -7,8 +7,6 @@ from typing import Optional, Dict, Any
 from dataclasses import asdict
 import psutil
 from logging.handlers import RotatingFileHandler
-import logging
-import os
 from .security import SecurityManager
 from .health_monitor import HealthMonitor
 from .cert_manager import CertificateManager
