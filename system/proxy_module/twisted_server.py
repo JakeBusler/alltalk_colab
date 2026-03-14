@@ -1,28 +1,6 @@
-import subprocess
 import sys
 from pathlib import Path
 import logging
-
-# Auto-install requirements if missing
-def install_requirements():
-    """Install missing requirements only if they're not already in sys.modules"""
-    required_packages = [
-        "twisted",
-        "cryptography", 
-        "service_identity",
-        "requests",
-        "psutil"
-    ]
-    
-    for package in required_packages:
-        if package not in sys.modules:
-            try:
-                __import__(package)
-            except ImportError:
-                print(f"Package '{package}' is not installed. Installing now...")
-                subprocess.check_call([sys.executable, "-m", "pip", "install", package])
-
-install_requirements()
 
 from twisted.internet import reactor, ssl
 from twisted.web import proxy, server
