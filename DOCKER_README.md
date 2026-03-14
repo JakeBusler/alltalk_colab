@@ -58,8 +58,8 @@ following optional arguments:
 - `--with-multi-engine-manager` enables the use of the [multi engine manager (MEM)](https://github.com/erew123/alltalk_tts/wiki/Multi-Engine-Manager)
     which allows for more parallel requests. By default, one TTS engine is started. Optionally, you can pass the
     file path of a JSON file which can be a subset of `mem_config.json` with more fine-grained configuration options.
-  - Example: `docker-start.sh --with-multi_engine_manager` to use MEM with default settings or 
-    `docker-start.sh --with-multi_engine_manager /my/config/file.json` to pass a JSON file containing more settings.
+  - Example: `docker-start.sh --with-multi-engine-manager` to use MEM with default settings or 
+    `docker-start.sh --with-multi-engine-manager /my/config/file.json` to pass a JSON file containing more settings.
 - `--tag` allows to choose the docker tag of the image to run. Defaults to `latest-xtts`.
     - Example: `docker-start.sh --tag mytag`
 - `--docker-repository` allows to choose another Docker repository for pulling the image from. Use an empty 
