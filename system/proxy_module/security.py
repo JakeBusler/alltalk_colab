@@ -2,7 +2,7 @@ import logging
 from typing import Dict, Any, Set
 import time
 from collections import defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from threading import Lock
 
 @dataclass
@@ -10,11 +10,7 @@ class SecurityMetrics:
     total_requests: int = 0
     blocked_requests: int = 0
     last_incident: float = 0
-    blacklisted_ips: Set[str] = None
-    
-    def __post_init__(self):
-        if self.blacklisted_ips is None:
-            self.blacklisted_ips = set()
+    blacklisted_ips: Set[str] = field(default_factory=set)
 
 class SecurityManager:
     def __init__(self, proxy_manager):
